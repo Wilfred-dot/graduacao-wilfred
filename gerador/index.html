@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#040918">
+<title>Gerador de links</title>
+<style>
+  :root{--navy:#040918;--blue:#2f6bff;--blue2:#6aa5ff;--silver:#c9d1dc;--silver2:#eef2f7;--muted:#94a3b8;--card:rgba(255,255,255,.05);--line:rgba(201,209,220,.22)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{min-height:100svh;background:radial-gradient(1000px 700px at 50% -10%,#0f2a66 0,var(--navy) 62%) fixed;color:#dfe6f0;font:16px/1.6 system-ui,-apple-system,'Segoe UI',sans-serif;padding:28px 18px 60px}
+  .wrap{max-width:720px;margin:0 auto}
+  h1{font-size:1.6rem;color:var(--silver2);margin-bottom:4px}
+  p.sub{color:var(--muted);font-size:.92rem;margin-bottom:22px}
+  label{display:block;font-size:.85rem;color:var(--silver);margin:16px 0 6px}
+  textarea,input[type=text],input[type=password]{width:100%;padding:13px 14px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:#fff;font:inherit;outline:none}
+  textarea{min-height:140px;resize:vertical}
+  textarea:focus,input:focus{border-color:var(--blue2)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;padding:12px 22px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.07);color:var(--silver2);font:600 .95rem inherit;cursor:pointer;text-decoration:none;transition:transform .15s,background .2s}
+  .btn:hover{background:rgba(255,255,255,.12)}.btn:active{transform:scale(.97)}
+  .btn.primary{background:linear-gradient(135deg,#1f4fd8,#2f6bff 55%,#6aa5ff);border-color:transparent;color:#fff}
+  .linha{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  .item{margin-top:12px;padding:14px;border:1px solid var(--line);background:var(--card);border-radius:16px}
+  .item b{display:block;color:#fff;margin-bottom:6px}
+  .item input{font-size:.85rem;padding:10px 12px;margin-bottom:10px}
+  .item .linha{margin-top:0}.item .btn{padding:9px 16px;font-size:.85rem}
+  .erro{color:#ff8a8a;font-size:.88rem;margin-top:8px;min-height:1.2em}
+  #painel{display:none}
+  .topo{display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .nota{font-size:.82rem;color:var(--muted);margin-top:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ===== senha ===== -->
+  <div id="porta">
+    <h1>Gerador de links</h1>
+    <p class="sub">Área só para ti. Introduz a senha.</p>
+    <form id="formSenha">
+      <input type="password" id="senha" placeholder="Senha" autocomplete="current-password" autofocus>
+      <p class="erro" id="erro"></p>
+      <div class="linha"><button class="btn primary" type="submit">Entrar</button></div>
+    </form>
+  </div>
+
+  <!-- ===== painel ===== -->
+  <div id="painel">
+    <div class="topo">
+      <div><h1>Gerador de links</h1><p class="sub">Um link por convidado. O nome aparece no convite.</p></div>
+      <button class="btn" id="sair" type="button">Sair</button>
+    </div>
+
+    <label for="nomes">Nomes dos convidados (um por linha)</label>
+    <textarea id="nomes" placeholder="Celia &amp; Esposo&#10;Fatima Falar&#10;Maria &amp; João"></textarea>
+    <p class="nota">Para casais usa <b>&amp;</b> (ex.: Celia &amp; Esposo). O convite passa sozinho para "vos convidar".</p>
+
+    <label for="msg">Mensagem para o WhatsApp</label>
+    <input type="text" id="msg" value="Olá {nome}! Tenho um convite especial para a minha festa de graduação. Abre aqui: {link}">
+    <p class="nota">{nome} e {link} são trocados automaticamente.</p>
+
+    <div class="linha">
+      <button class="btn primary" id="gerar" type="button">Gerar links</button>
+      <button class="btn" id="copiarTodos" type="button">Copiar todos</button>
+      <button class="btn" id="limpar" type="button">Limpar</button>
+    </div>
+
+    <div id="lista"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var SENHA = 'wilfred2026';            // <- muda a senha aqui
+  var $ = function (id) { return document.getElementById(id); };
+  var KEY = 'gerador_nomes_v1', OK = 'gerador_ok_v1';
+
+  function ler(k) { try { return sessionStorage.getItem(k) || localStorage.getItem(k); } catch (e) { return null; } }
+  function gravar(s, k, v) { try { (s === 's' ? sessionStorage : localStorage).setItem(k, v); } catch (e) {} }
+  function apagar(k) { try { sessionStorage.removeItem(k); } catch (e) {} }
+
+  function mostrar() { $('porta').style.display = 'none'; $('painel').style.display = 'block'; $('nomes').value = ler(KEY) || ''; if ($('nomes').value) gerar(); }
+  if (ler(OK) === '1') mostrar();
+
+  $('formSenha').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if ($('senha').value === SENHA) { gravar('s', OK, '1'); mostrar(); }
+    else { $('erro').textContent = 'Senha errada.'; $('senha').select(); }
+  });
+  $('sair').addEventListener('click', function () { apagar(OK); location.reload(); });
+
+  // endereço base do convite (a pasta acima de /gerador/)
+  function baseUrl() { return location.origin + location.pathname.replace(/gerador\/?(index\.html)?$/, ''); }
+
+  function linkDe(nome) { return baseUrl() + '?nome=' + encodeURIComponent(nome); }
+  function nomes() {
+    return $('nomes').value.split('\n').map(function (n) { return n.replace(/\s+/g, ' ').trim(); }).filter(Boolean);
+  }
+  function mensagem(nome, link) { return $('msg').value.replace(/\{nome\}/g, nome).replace(/\{link\}/g, link); }
+
+  function copiar(txt, btn) {
+    function ok() { var o = btn.textContent; btn.textContent = 'Copiado!'; setTimeout(function () { btn.textContent = o; }, 1500); }
+    function fb() { var t = document.createElement('textarea'); t.value = txt; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); } catch (e) {} t.remove(); ok(); }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(ok, fb); else fb();
+  }
+
+  function gerar() {
+    var ns = nomes(); gravar('l', KEY, $('nomes').value);
+    var box = $('lista'); box.innerHTML = '';
+    ns.forEach(function (n) {
+      var link = linkDe(n);
+      var d = document.createElement('div'); d.className = 'item';
+      d.innerHTML = '<b></b><input type="text" readonly><div class="linha"><button class="btn primary" type="button">Copiar link</button><a class="btn" target="_blank" rel="noopener">Enviar no WhatsApp</a><a class="btn" target="_blank" rel="noopener">Abrir</a></div>';
+      d.querySelector('b').textContent = n;
+      var inp = d.querySelector('input'); inp.value = link; inp.addEventListener('focus', function () { inp.select(); });
+      d.querySelector('button').addEventListener('click', function (e) { copiar(link, e.currentTarget); });
+      var as = d.querySelectorAll('a');
+      as[0].href = 'https://wa.me/?text=' + encodeURIComponent(mensagem(n, link));
+      as[1].href = link;
+      box.appendChild(d);
+    });
+  }
+  $('gerar').addEventListener('click', gerar);
+  $('nomes').addEventListener('input', function () { gravar('l', KEY, $('nomes').value); });
+  $('copiarTodos').addEventListener('click', function (e) {
+    var ns = nomes(); if (!ns.length) return;
+    copiar(ns.map(function (n) { return n + '\n' + linkDe(n); }).join('\n\n'), e.currentTarget);
+  });
+  $('limpar').addEventListener('click', function () { $('nomes').value = ''; gravar('l', KEY, ''); $('lista').innerHTML = ''; });
+})();
+</script>
+</body>
+</html>
