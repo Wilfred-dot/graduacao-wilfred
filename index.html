@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Convite de Graduação · Wilfred Deloviar Junior</title>
+<meta name="description" content="Convite para a festa de graduação de Wilfred Deloviar Junior · Licenciatura em Tecnologia de Informação · UCM-FEG · Sábado, 17 de Outubro de 2026.">
+<meta name="theme-color" content="#040918">
+<meta name="robots" content="noindex, nofollow">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_PT">
+<meta property="og:title" content="Convite de Graduação · Wilfred Deloviar Junior">
+<meta property="og:description" content="Vem celebrar comigo a minha licenciatura em Tecnologia de Informação · Sábado, 17 de Outubro de 2026.">
+<meta property="og:image" content="https://graduacao-wilfred.vercel.app/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="progress"><i id="prog"></i></div>
+<canvas id="bg" aria-hidden="true"></canvas>
+<canvas id="confetti" aria-hidden="true"></canvas>
+<audio id="audio" loop preload="auto"></audio>
+
+<button class="music" id="musicBtn" hidden aria-label="Ligar ou desligar a música">
+  <span class="eq"><i></i><i></i><i></i><i></i></span>
+</button>
+
+<!-- ============ PORTAS (só aparecem na transição da capa para o convite) ============ -->
+<div class="portas" id="portas" aria-hidden="true">
+  <div class="luz"><i class="brilho"></i><i class="feixe"></i></div>
+  <div class="porta esq"><i class="puxador"></i></div>
+  <div class="porta dir"><i class="puxador"></i></div>
+  <i class="flash"></i>
+</div>
+
+<!-- ============ 1. CAPA (página inicial) ============ -->
+<section class="capa" id="capa">
+  <span class="ti ti-float t1">&lt;/&gt;</span>
+  <span class="ti ti-float t2">{ }</span>
+  <span class="ti ti-float t3">01</span>
+  <span class="ti ti-float t4">&lt;TI /&gt;</span>
+  <span class="ti ti-float t5">;</span>
+  <span class="ti ti-float t6">10</span>
+
+  <div class="capa-inner">
+    <p class="inst-top"><span id="capaUni"></span><span id="capaFac"></span></p>
+    <img class="logo" id="logo" alt="Logo da Universidade Católica de Moçambique">
+    <p class="kicker"><span id="capaTitulo1"></span><span id="capaTitulo2"></span></p>
+
+    <div class="moldura-wrap">
+      <svg class="capelo" viewBox="0 0 120 80" aria-hidden="true">
+        <defs>
+          <linearGradient id="gc" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#eef2f7"/><stop offset="1" stop-color="#8d9bb2"/>
+          </linearGradient>
+        </defs>
+        <path d="M26 44v16c0 9 68 9 68 0V44L60 58z" fill="#7d8ba3"/>
+        <polygon points="60,6 118,30 60,54 2,30" fill="url(#gc)"/>
+        <path d="M112 32v30" stroke="#c9d1dc" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="112" cy="67" r="4.5" fill="#c9d1dc"/>
+      </svg>
+      <div class="moldura"><img class="foto" id="fotoFormal" alt="Wilfred Deloviar Junior"></div>
+    </div>
+
+    <h1 class="nome shimmer" id="capaNome"></h1>
+    <p class="curso" id="capaCurso"></p>
+    <p class="anos" id="capaAnos"></p>
+    <p class="ti codeline"><span id="codeline"></span><i class="cursor"></i></p>
+
+    <button class="btn primary grande" id="abrir" type="button"><span>Abrir convite</span></button>
+    <p class="hint">Toca para abrir · com música</p>
+  </div>
+  <div class="scroll-hint" aria-hidden="true"><i></i></div>
+</section>
+
+<main id="conteudo">
+
+  <!-- ============ 2. CONVIDADO + ABERTURA ============ -->
+  <section class="sec" id="convidado">
+    <div class="ornamento reveal" aria-hidden="true"><i></i><b></b><i></i></div>
+    <p class="guest reveal" style="--d:.1s"><span class="guest-label" id="guestLabel">Convidado:</span> <strong id="guestNome"></strong></p>
+    <p class="abertura reveal" style="--d:.25s" id="abertura"></p>
+  </section>
+
+  <!-- ============ 3. CONTAGEM DECRESCENTE ============ -->
+  <section class="sec" id="contagem">
+    <h2 class="titulo reveal">Falta pouco</h2>
+    <div class="cd reveal" style="--d:.15s" id="cdWrap">
+      <div><b id="cdD">00</b><small>dias</small></div>
+      <div><b id="cdH">00</b><small>horas</small></div>
+      <div><b id="cdM">00</b><small>minutos</small></div>
+      <div><b id="cdS">00</b><small>segundos</small></div>
+    </div>
+    <p class="feito" id="cdDone" hidden>A festa já começou!</p>
+  </section>
+
+  <!-- ============ 4. DATA, HORA E LOCAL ============ -->
+  <section class="sec" id="detalhes">
+    <h2 class="titulo reveal">A festa</h2>
+
+    <div class="bilhete">
+      <div class="tile tile-data reveal" style="--d:.05s">
+        <small>Data</small>
+        <span class="semana" id="dSemana"></span>
+        <b class="dia" id="dDia"></b>
+        <span class="mes" id="dMes"></span>
+      </div>
+      <div class="tile tile-hora reveal" style="--d:.15s">
+        <small>Hora</small>
+        <b class="hora" id="dHora"></b>
+        <span class="mes">Início da festa</span>
+      </div>
+      <div class="tile tile-local reveal" style="--d:.25s">
+        <small>Local</small>
+        <ol class="rota tl" id="dRota"></ol>
+      </div>
+    </div>
+
+    <div class="acoes reveal" style="--d:.1s;margin-top:22px">
+      <a class="btn" id="mapaBtn" target="_blank" rel="noopener">Ver no Google Maps</a>
+    </div>
+
+    <h3 class="sub reveal">Guardar a data</h3>
+    <p class="mini reveal" id="lembreteTexto"></p>
+    <div class="acoes reveal">
+      <button class="btn primary" id="btnCal" type="button"><span>Guardar no calendário</span></button>
+      <a class="btn" id="btnGcal" target="_blank" rel="noopener">Google Calendar</a>
+    </div>
+
+    <h3 class="sub reveal">Direcção da casa</h3>
+    <p class="mini reveal">Liga para te orientar até lá</p>
+    <div class="contactos" id="contDirecao"></div>
+  </section>
+
+  <!-- ============ 5. PROGRAMA ============ -->
+  <section class="sec" id="programa">
+    <h2 class="titulo reveal">Programa</h2>
+    <ol class="tl" id="progLista"></ol>
+  </section>
+
+  <!-- ============ 6. A MINHA JORNADA ============ -->
+  <section class="sec" id="jornada">
+    <h2 class="titulo reveal">A minha jornada</h2>
+    <p class="mini reveal">De 2022 a 2026</p>
+    <div class="stats" id="stats"></div>
+    <div class="tl" id="jornadaLista"></div>
+  </section>
+
+  <!-- ============ 7. AGRADECIMENTO ============ -->
+  <section class="sec" id="agradecimento">
+    <h2 class="titulo reveal">Gratidão</h2>
+    <p class="citacao reveal" style="--d:.15s" id="agradTexto"></p>
+  </section>
+
+  <!-- ============ 8. PRESENTE ============ -->
+  <section class="sec" id="presente">
+    <h2 class="titulo reveal">Presente</h2>
+    <p class="texto reveal" style="--d:.1s" id="presenteTexto"></p>
+    <div class="opcoes">
+      <div class="opcao reveal" style="--d:.15s">
+        <span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13M3 13h18M12 8c-2.5 0-4-1-4-2.5S9 3 10.5 3C12 3 12 5.5 12 8zM12 8c2.5 0 4-1 4-2.5S15 3 13.5 3C12 3 12 5.5 12 8z"/></svg></span>
+        <b id="presFisTitulo"></b>
+        <p id="presFisTexto"></p>
+      </div>
+      <div class="opcao reveal" style="--d:.25s">
+        <span class="ic"><svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg></span>
+        <b id="presDigTitulo"></b>
+        <p id="presDigTexto"></p>
+        <button class="btn" id="btnPresente" type="button" aria-expanded="false"><span id="presDigBotao"></span></button>
+      </div>
+    </div>
+    <div class="pay" id="pay"></div>
+  </section>
+
+  <!-- ============ 9. CONFIRMAR PRESENÇA ============ -->
+  <section class="sec" id="rsvp">
+    <h2 class="titulo reveal">Confirmar presença</h2>
+    <p class="texto reveal" style="--d:.1s"><span id="rsvpTexto"></span> <strong id="rsvpPrazo"></strong></p>
+    <div class="botoes reveal" style="--d:.2s">
+      <a class="btn primary" id="btnSim" target="_blank" rel="noopener">Confirmo</a>
+      <a class="btn" id="btnNao" target="_blank" rel="noopener">Não poderei</a>
+    </div>
+    <p class="mini reveal" style="--d:.3s">Abre o WhatsApp com a mensagem já escrita.</p>
+  </section>
+
+  <!-- ============ 10. CONTACTOS E FIM ============ -->
+  <section class="sec" id="fim">
+    <h3 class="sub reveal">Dúvidas?</h3>
+    <div class="contactos" id="contDuvidas"></div>
+    <div class="ornamento reveal" aria-hidden="true"><i></i><b></b><i></i></div>
+    <p class="final reveal" id="fraseFinal"></p>
+    <p class="despedida reveal" id="despedida"></p>
+    <div class="assin reveal" id="rodape"></div>
+  </section>
+
+</main>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
