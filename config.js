@@ -27,21 +27,17 @@ window.CONFIG = {
     { titulo: "Entrada de Machute" },
     { titulo: "Casa da Célia", detalhe: "Residência Vilanculos" }
   ],
-  // Quando tiveres a localização exacta, cola aqui o link do Google Maps
-  mapaLink: "https://www.google.com/maps/search/?api=1&query=Aeroporto+da+Beira",
-
-  /* ---- CALENDÁRIO E LEMBRETES ----
-     O botão "Guardar no calendário" cria o evento com estes lembretes
-     (tocam como alarme/notificação no telemóvel do convidado).         */
-  calendario: {
-    titulo: "Festa de Graduação de Wilfred Deloviar Junior",
-    local: "Casa da Célia (Residência Vilanculos), Bairro do Aeroporto, Beira",
-    duracaoHoras: 8,
-    lembretes: [
-      { minutos: 1440, texto: "Amanhã" },
-      { minutos: 180,  texto: "Daqui a 3 horas" },
-      { minutos: 60,   texto: "Daqui a 1 hora" }
-    ]
+  /* ---- MAPA ----
+     O botão abre a app de mapas do telemóvel (Android: Google Maps ou a
+     app escolhida; iPhone: Mapas). Não pede login nem descarrega nada.
+     Quando tiveres a localização exacta, preenche lat e lng (ex.: -19.8436 e 34.8389).
+     Para ver as coordenadas: no Google Maps, carrega e segura no local e copia os números. */
+  mapa: {
+    nome: "Casa da Célia",
+    consulta: "Bairro do Aeroporto, Beira, Moçambique",
+    linkApple: "https://maps.apple/p/vTv_dTDwUV4DjQ",   // local exacto (iPhone)
+    lat: null,
+    lng: null
   },
 
   /* ---- CONTACTOS (só números, sem +258) ---- */

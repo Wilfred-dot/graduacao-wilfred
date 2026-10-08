@@ -67,7 +67,23 @@
     if (p.detalhe) { var em = el('em'); em.textContent = p.detalhe; li.appendChild(em); }
     $('dRota').appendChild(li);
   });
-  $('mapaBtn').href = C.mapaLink;
+  /* ---------- mapa: abre a app de mapas do telemóvel ---------- */
+  (function () {
+    var M = C.mapa, btn = $('mapaBtn');
+    var q = (M.lat && M.lng) ? (M.lat + ',' + M.lng) : M.consulta;
+    var ua = navigator.userAgent;
+    var ios = /iP(hone|ad|od)/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    var android = /Android/i.test(ua);
+    if (ios) {
+      btn.href = M.linkApple ? M.linkApple : (M.lat && M.lng) ? 'https://maps.apple.com/?ll=' + q + '&q=' + encodeURIComponent(M.nome)
+                                  : 'https://maps.apple.com/?q=' + encodeURIComponent(M.consulta);
+    } else if (android) {
+      btn.href = 'geo:0,0?q=' + encodeURIComponent(M.lat && M.lng ? q + '(' + M.nome + ')' : M.consulta);
+    } else {
+      btn.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q);
+      btn.target = '_blank'; btn.rel = 'noopener';
+    }
+  })();
 
   function contacto(c) {
     var a = el('a', 'contacto',
@@ -85,58 +101,6 @@
   C.contactosDirecao.forEach(function (c, i) { var a = contacto(c); a.classList.add('reveal'); a.style.setProperty('--d', (i * .1) + 's'); $('contDirecao').appendChild(a); });
   C.contactosDuvidas.forEach(function (c, i) { var a = contacto(c); a.classList.add('reveal'); a.style.setProperty('--d', (i * .1) + 's'); $('contDuvidas').appendChild(a); });
 
-  /* ---------- calendário e lembretes ---------- */
-  var cal = C.calendario;
-  var dFim = new Date(dFesta.getTime() + cal.duracaoHoras * 3600000);
-  function z(d) { return d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, ''); }
-  function esc(s) { return String(s).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n'); }
-  function fold(l) { var o = []; while (l.length > 60) { o.push(l.slice(0, 60)); l = ' ' + l.slice(60); } o.push(l); return o.join('\r\n'); }
-  function listaContactos(a) {
-    return a.map(function (c) { return c.nome + (c.etiqueta ? ' (' + c.etiqueta + ')' : '') + ' ' + fmtTel(c.numero); }).join(' · ');
-  }
-  function durTxt(m) {
-    if (m >= 1440) { var d = Math.round(m / 1440); return d + (d > 1 ? ' dias' : ' dia'); }
-    if (m >= 60) { var h = Math.round(m / 60); return h + (h > 1 ? ' horas' : ' hora'); }
-    return m + ' min';
-  }
-  var linkConvite = /^https?:/.test(location.href) ? location.origin + location.pathname : '';
-  var calDesc = [
-    'Celebração da licenciatura em Tecnologia de Informação (UCM-FEG).',
-    dataTexto + ', às ' + horaTexto + '.',
-    'Local: ' + cal.local,
-    'Direcção da casa: ' + listaContactos(C.contactosDirecao),
-    'Dúvidas: ' + listaContactos(C.contactosDuvidas),
-    'Confirmar presença até ' + prazoTexto + '.'
-  ].join('\n') + (linkConvite ? '\n' + linkConvite : '');
-
-  function buildICS() {
-    var L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Graduacao Wilfred//PT', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
-      'BEGIN:VEVENT', 'UID:graduacao-wilfred-2026@graduacao-wilfred', 'DTSTAMP:' + z(new Date()),
-      'DTSTART:' + z(dFesta), 'DTEND:' + z(dFim),
-      'SUMMARY:' + esc(cal.titulo), 'LOCATION:' + esc(cal.local), 'DESCRIPTION:' + esc(calDesc)];
-    cal.lembretes.forEach(function (l) {
-      L.push('BEGIN:VALARM', 'ACTION:DISPLAY',
-        'DESCRIPTION:' + esc(l.texto + ': ' + cal.titulo + ' · ' + dataTexto + ', ' + horaTexto),
-        'TRIGGER:-PT' + l.minutos + 'M', 'END:VALARM');
-    });
-    L.push('END:VEVENT', 'END:VCALENDAR');
-    return L.map(fold).join('\r\n') + '\r\n';
-  }
-  var lbl = cal.lembretes.map(function (l) { return durTxt(l.minutos); }), ultimo = lbl.pop();
-  set('lembreteTexto', 'Lembretes no telemóvel: ' + (lbl.length ? lbl.join(', ') + ' e ' : '') + ultimo + ' antes.');
-  $('btnGcal').href = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent(cal.titulo) +
-    '&dates=' + z(dFesta) + '/' + z(dFim) + '&details=' + encodeURIComponent(calDesc) +
-    '&location=' + encodeURIComponent(cal.local) + '&ctz=Africa/Maputo';
-  $('btnCal').addEventListener('click', function () {
-    var txt = buildICS();
-    var ios = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    if (ios) { location.href = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(txt); return; }
-    var url = URL.createObjectURL(new Blob([txt], { type: 'text/calendar;charset=utf-8' }));
-    var a = document.createElement('a');
-    a.href = url; a.download = 'festa-graduacao-wilfred.ics';
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
-  });
 
   /* ---------- programa ---------- */
   C.programa.forEach(function (it) {
