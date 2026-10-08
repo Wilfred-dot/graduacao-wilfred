@@ -35,11 +35,11 @@ window.CONFIG = {
   mapa: {
     nome: "Casa da Célia",
     consulta: "Bairro do Aeroporto, Beira, Moçambique",
-    linkApple: "https://maps.apple/p/vTv_dTDwUV4DjQ",   // local exacto (iPhone)
+    linkApple: "https://maps.apple/p/PQ0Y7JXAma9qGS",   // local exacto (iPhone)
     lat: null,
     lng: null
   },
-
+  
   /* ---- CONTACTOS (só números, sem +258) ---- */
   whatsappRsvp: "258850351131",            // recebe as confirmações
   contactosDirecao: [                      // para chegar à casa (lado a lado, por esta ordem)
