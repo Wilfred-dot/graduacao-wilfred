@@ -340,10 +340,27 @@
       var v = 0, iv = setInterval(function () { v = Math.min(C.volumeMusica, v + .02); audio.volume = v; if (v >= C.volumeMusica) clearInterval(iv); }, 120);
     }).catch(function () {});
   }
+  var retomar = false;   // true se a música parou só porque o convite saiu do ecrã
   mb.addEventListener('click', function () {
+    retomar = false;
     if (audio.paused) { audio.volume = C.volumeMusica; audio.play(); mb.classList.add('on'); }
     else { audio.pause(); mb.classList.remove('on'); }
   });
+  /* pára ao minimizar, mudar de aplicação ou de separador; retoma ao voltar */
+  function pausarFora() {
+    if (!audio.paused) { retomar = true; audio.pause(); mb.classList.remove('on'); }
+  }
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) pausarFora();
+    else if (retomar) {
+      retomar = false;
+      audio.volume = C.volumeMusica;
+      var p = audio.play();
+      if (p && p.then) p.then(function () { mb.classList.add('on'); }).catch(function () {});
+    }
+  });
+  window.addEventListener('pagehide', pausarFora);
+  window.addEventListener('blur', function () { if (document.hidden) pausarFora(); });
 
   /* ---------- transição: capa -> portas -> convite ---------- */
   var portas = $('portas'), emTransicao = false;
